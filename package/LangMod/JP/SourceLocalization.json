@@ -1,0 +1,14 @@
+{
+  "LangGeneral.ogtAltarStats.text": "神のセーブ状態",
+  "LangGeneral.ogtGodStatsTitle.text": "神のセーブ状態：#1",
+  "LangGeneral.ogtGodStatsNoState.text": "この神には現在のセーブ内に保存状態がありません。",
+  "LangGeneral.ogtGodStatsJoined.text": "加入中",
+  "LangGeneral.ogtGodStatsYes.text": "はい",
+  "LangGeneral.ogtGodStatsNo.text": "いいえ",
+  "LangGeneral.ogtGodStatsPiety.text": "信仰心",
+  "LangGeneral.ogtGodStatsPietyExp.text": "信仰心EXP",
+  "LangGeneral.ogtGodStatsWorshipDays.text": "信仰日数",
+  "LangGeneral.ogtGodStatsGiftRank.text": "報酬ランク",
+  "LangGeneral.ogtGodStatsApostleRewards.text": "使徒報酬",
+  "LangGeneral.ogtGodStatsArtifactRewards.text": "神アーティファクト報酬"
+}

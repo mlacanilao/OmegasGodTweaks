@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ConfigLayoutSchema.xsd">
+    <hlayout id="JoiningLayout">
+        <vlayout id="JoiningGroup" border="true">
+            <title>config.joining.title</title>
+            <text id="config.joining.description">config.joining.description</text>
+
+            <toggle id="AllowJoiningMultipleReligionsToggle">
+                <contentId>config.allow_joining_multiple_religions.name</contentId>
+                <tooltip>config.allow_joining_multiple_religions.tooltip</tooltip>
+            </toggle>
+            <toggle id="RemoveConversionPunishmentToggle">
+                <contentId>config.remove_conversion_punishment.name</contentId>
+                <tooltip>config.remove_conversion_punishment.tooltip</tooltip>
+            </toggle>
+            <toggle id="RemoveAltarTakeoverPunishmentToggle">
+                <contentId>config.remove_altar_takeover_punishment.name</contentId>
+                <tooltip>config.remove_altar_takeover_punishment.tooltip</tooltip>
+            </toggle>
+        </vlayout>
+    </hlayout>
+
+    <hlayout id="OfferingsLayout">
+        <vlayout id="OfferingsGroup" border="true">
+            <title>config.offerings.title</title>
+            <text id="config.offerings.description">config.offerings.description</text>
+
+            <toggle id="AllowOfferingsForJoinedNonCurrentGodsToggle">
+                <contentId>config.allow_offerings_for_joined_non_current_gods.name</contentId>
+                <tooltip>config.allow_offerings_for_joined_non_current_gods.tooltip</tooltip>
+            </toggle>
+            <toggle id="RemoveOfferingCategoryRestrictionsToggle">
+                <contentId>config.remove_offering_category_restrictions.name</contentId>
+                <tooltip>config.remove_offering_category_restrictions.tooltip</tooltip>
+            </toggle>
+            <toggle id="RemovePietyCapFromOfferingsToggle">
+                <contentId>config.remove_piety_cap_from_offerings.name</contentId>
+                <tooltip>config.remove_piety_cap_from_offerings.tooltip</tooltip>
+            </toggle>
+            <toggle id="RemoveOfferingWeightValueCapToggle">
+                <contentId>config.remove_offering_weight_value_cap.name</contentId>
+                <tooltip>config.remove_offering_weight_value_cap.tooltip</tooltip>
+            </toggle>
+            <toggle id="RemoveOfferingLevelBonusCapToggle">
+                <contentId>config.remove_offering_level_bonus_cap.name</contentId>
+                <tooltip>config.remove_offering_level_bonus_cap.tooltip</tooltip>
+            </toggle>
+            <toggle id="RemoveOfferingOverflowWasteToggle">
+                <contentId>config.remove_offering_overflow_waste.name</contentId>
+                <tooltip>config.remove_offering_overflow_waste.tooltip</tooltip>
+            </toggle>
+            <toggle id="DisableHarvestQuestOfferingKarmaLossToggle">
+                <contentId>config.disable_harvest_quest_offering_karma_loss.name</contentId>
+                <tooltip>config.disable_harvest_quest_offering_karma_loss.tooltip</tooltip>
+            </toggle>
+            <toggle id="ShowPietyFaithAfterOfferingToggle">
+                <contentId>config.show_piety_faith_after_offering.name</contentId>
+                <tooltip>config.show_piety_faith_after_offering.tooltip</tooltip>
+            </toggle>
+        </vlayout>
+    </hlayout>
+
+    <hlayout id="PrayerLayout">
+        <vlayout id="PrayerGroup" border="true">
+            <title>config.prayer.title</title>
+            <text id="config.prayer.description">config.prayer.description</text>
+
+            <toggle id="AddPietyGainFromPrayerToggle">
+                <contentId>config.add_piety_gain_from_prayer.name</contentId>
+                <tooltip>config.add_piety_gain_from_prayer.tooltip</tooltip>
+            </toggle>
+            <toggle id="AllowMultiplePrayersPerDayToggle">
+                <contentId>config.allow_multiple_prayers_per_day.name</contentId>
+                <tooltip>config.allow_multiple_prayers_per_day.tooltip</tooltip>
+            </toggle>
+            <toggle id="ApplyPrayerPietyToJoinedGodsToggle">
+                <contentId>config.apply_prayer_piety_to_joined_gods.name</contentId>
+                <tooltip>config.apply_prayer_piety_to_joined_gods.tooltip</tooltip>
+            </toggle>
+            <toggle id="AllowPassivePrayerPietyGainToggle">
+                <contentId>config.allow_passive_prayer_piety_gain.name</contentId>
+                <tooltip>config.allow_passive_prayer_piety_gain.tooltip</tooltip>
+            </toggle>
+            <toggle id="AllowPrayerRewardChecksForJoinedGodsToggle">
+                <contentId>config.allow_prayer_reward_checks_for_joined_gods.name</contentId>
+                <tooltip>config.allow_prayer_reward_checks_for_joined_gods.tooltip</tooltip>
+            </toggle>
+            <toggle id="ShowPietyFaithAfterPrayerToggle">
+                <contentId>config.show_piety_faith_after_prayer.name</contentId>
+                <tooltip>config.show_piety_faith_after_prayer.tooltip</tooltip>
+            </toggle>
+            <topic>config.prayer_piety_gain.title</topic>
+            <input id="PrayerPietyGainInput" char_limit="12">
+                <placeholder>config.prayer_piety_gain.placeholder</placeholder>
+            </input>
+        </vlayout>
+    </hlayout>
+
+    <hlayout id="RewardsLayout">
+        <vlayout id="RewardsGroup" border="true">
+            <title>config.rewards.title</title>
+            <text id="config.rewards.description">config.rewards.description</text>
+
+            <toggle id="RepeatApostleRewardsToggle">
+                <contentId>config.repeat_apostle_rewards.name</contentId>
+                <tooltip>config.repeat_apostle_rewards.tooltip</tooltip>
+            </toggle>
+            <toggle id="RepeatArtifactRewardsToggle">
+                <contentId>config.repeat_artifact_rewards.name</contentId>
+                <tooltip>config.repeat_artifact_rewards.tooltip</tooltip>
+            </toggle>
+        </vlayout>
+    </hlayout>
+
+    <hlayout id="ArtifactsLayout">
+        <vlayout id="ArtifactsGroup" border="true">
+            <title>config.artifacts.title</title>
+            <text id="config.artifacts.description">config.artifacts.description</text>
+
+            <toggle id="ApplyJoinedGodBonusesToggle">
+                <contentId>config.apply_joined_god_bonuses.name</contentId>
+                <tooltip>config.apply_joined_god_bonuses.tooltip</tooltip>
+            </toggle>
+            <toggle id="RemoveFaithResistanceBonusCapToggle">
+                <contentId>config.remove_faith_resistance_bonus_cap.name</contentId>
+                <tooltip>config.remove_faith_resistance_bonus_cap.tooltip</tooltip>
+            </toggle>
+            <toggle id="UnlockGodArtifactFactionEffectsToggle">
+                <contentId>config.unlock_god_artifact_faction_effects.name</contentId>
+                <tooltip>config.unlock_god_artifact_faction_effects.tooltip</tooltip>
+            </toggle>
+            <toggle id="AllowDuplicateGodArtifactsToggle">
+                <contentId>config.allow_duplicate_god_artifacts.name</contentId>
+                <tooltip>config.allow_duplicate_god_artifacts.tooltip</tooltip>
+            </toggle>
+            <toggle id="DisableEythSingleArtifactPurgeToggle">
+                <contentId>config.disable_eyth_single_artifact_purge.name</contentId>
+                <tooltip>config.disable_eyth_single_artifact_purge.tooltip</tooltip>
+            </toggle>
+            <toggle id="DisableApostleInfightingToggle">
+                <contentId>config.disable_apostle_infighting.name</contentId>
+                <tooltip>config.disable_apostle_infighting.tooltip</tooltip>
+            </toggle>
+        </vlayout>
+    </hlayout>
+
+    <hlayout id="RevelationLayout">
+        <vlayout id="RevelationGroup" border="true">
+            <title>config.revelation.title</title>
+            <text id="config.revelation.description">config.revelation.description</text>
+
+            <toggle id="EnableJoinedGodRevelationRoutingToggle">
+                <contentId>config.enable_joined_god_revelation_routing.name</contentId>
+                <tooltip>config.enable_joined_god_revelation_routing.tooltip</tooltip>
+            </toggle>
+            <topic>config.joined_god_revelation_chance.title</topic>
+            <input id="JoinedGodRevelationChanceInput" char_limit="3">
+                <placeholder>config.joined_god_revelation_chance.placeholder</placeholder>
+            </input>
+            <topic>config.revelation_mode.title</topic>
+            <one_choice id="RevelationModeDropdown" type="dropdown" value="0">
+                <choice>
+                    <contentId>enum.revelation_mode.Vanilla</contentId>
+                </choice>
+                <choice>
+                    <contentId>enum.revelation_mode.SelectedJoinedGod</contentId>
+                </choice>
+                <choice>
+                    <contentId>enum.revelation_mode.AllJoinedGods</contentId>
+                </choice>
+            </one_choice>
+            <topic>config.selected_revelation_god.title</topic>
+            <one_choice id="SelectedRevelationGodDropdown" type="dropdown" value="0">
+                <choice>
+                    <contentId>config.selected_revelation_god.placeholder</contentId>
+                </choice>
+            </one_choice>
+        </vlayout>
+    </hlayout>
+
+    <hlayout id="GodStatsLayout">
+        <vlayout id="GodStatsGroup" border="true">
+            <title>config.god_stats.title</title>
+            <text id="config.god_stats.description">config.god_stats.description</text>
+
+            <topic>config.god_stats.dropdown.title</topic>
+            <one_choice id="GodStatsDropdown" type="dropdown" value="0">
+                <choice>
+                    <contentId>config.god_stats.placeholder</contentId>
+                </choice>
+            </one_choice>
+            <text id="GodStatsText" height="120">config.god_stats.no_state</text>
+        </vlayout>
+    </hlayout>
+</config>

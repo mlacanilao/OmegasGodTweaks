@@ -1,0 +1,14 @@
+{
+  "LangGeneral.ogtAltarStats.text": "神明存档状态",
+  "LangGeneral.ogtGodStatsTitle.text": "神明存档状态：#1",
+  "LangGeneral.ogtGodStatsNoState.text": "当前存档中没有该神明的保存状态。",
+  "LangGeneral.ogtGodStatsJoined.text": "已加入",
+  "LangGeneral.ogtGodStatsYes.text": "是",
+  "LangGeneral.ogtGodStatsNo.text": "否",
+  "LangGeneral.ogtGodStatsPiety.text": "虔诚",
+  "LangGeneral.ogtGodStatsPietyExp.text": "虔诚EXP",
+  "LangGeneral.ogtGodStatsWorshipDays.text": "信仰天数",
+  "LangGeneral.ogtGodStatsGiftRank.text": "奖励等级",
+  "LangGeneral.ogtGodStatsApostleRewards.text": "使徒奖励",
+  "LangGeneral.ogtGodStatsArtifactRewards.text": "神明神器奖励"
+}
