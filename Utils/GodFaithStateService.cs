@@ -26,7 +26,13 @@ internal static class GodFaithStateService
         }
 
         FaithSaveData.Current.EnsureCollections();
-        SnapshotCurrentFaith(chara: EClass.pc, joined: true);
+        Religion currentFaith = EClass.pc.faith;
+        if (currentFaith != null &&
+            string.IsNullOrWhiteSpace(value: currentFaith.id) == false &&
+            FaithSaveData.HasState(godId: currentFaith.id) == false)
+        {
+            SnapshotCurrentFaith(chara: EClass.pc, joined: true);
+        }
 
         if (OmegasGodTweaksConfig.AllowJoiningMultipleReligions.Value == false)
         {
@@ -44,7 +50,7 @@ internal static class GodFaithStateService
             religion.giftRank = pair.Value.GiftRank;
         }
 
-        ApplyStateToPlayer(religion: EClass.pc.faith);
+        ApplyStateToPlayer(religion: currentFaith);
         EClass.pc.RefreshFaithElement();
         ElementContainerPatch.RefreshAppliedArtifactEffects();
     }

@@ -70,38 +70,10 @@ internal static class Patcher
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(declaringType: typeof(GameIO), methodName: nameof(GameIO.SaveGame))]
-    internal static void GameIOSaveGamePostfix()
-    {
-        GameIOPatch.SaveGamePostfix();
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(declaringType: typeof(GameIO), methodName: nameof(GameIO.PrepareSteamCloud))]
-    internal static void GameIOPrepareSteamCloudPrefix(string id, string path)
-    {
-        GameIOPatch.PrepareSteamCloudPrefix(id: id, path: path);
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(declaringType: typeof(ReligionManager), methodName: nameof(ReligionManager.OnLoad))]
-    internal static void ReligionManagerOnLoadPostfix()
-    {
-        ReligionManagerPatch.OnLoadPostfix();
-    }
-
-    [HarmonyPostfix]
     [HarmonyPatch(declaringType: typeof(Game), methodName: nameof(Game.Load))]
     internal static void GameLoadPostfix()
     {
         GamePatch.LoadPostfix();
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(declaringType: typeof(ReligionManager), methodName: nameof(ReligionManager.OnCreateGame))]
-    internal static void ReligionManagerOnCreateGamePostfix()
-    {
-        ReligionManagerPatch.OnCreateGamePostfix();
     }
 
     [HarmonyPrefix]
@@ -302,9 +274,9 @@ internal static class Patcher
 
     [HarmonyPostfix]
     [HarmonyPatch(declaringType: typeof(ElementContainerFaction), methodName: nameof(ElementContainerFaction.OnUnequip), argumentTypes: new[] { typeof(Thing) })]
-    internal static void ElementContainerFactionOnUnequipPostfix(Thing t, bool __state)
+    internal static void ElementContainerFactionOnUnequipPostfix(ElementContainerFaction __instance, Thing t, bool __state)
     {
-        ElementContainerPatch.FactionOnUnequipPostfix(t: t, __state: __state);
+        ElementContainerPatch.FactionOnUnequipPostfix(charaElements: __instance, t: t, __state: __state);
     }
 
     [HarmonyFinalizer]

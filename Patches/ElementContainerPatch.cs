@@ -63,7 +63,7 @@ internal static class ElementContainerPatch
         isForcingTrackedArtifactRemoval = __state;
     }
 
-    internal static void FactionOnUnequipPostfix(Thing t, bool __state)
+    internal static void FactionOnUnequipPostfix(ElementContainerFaction charaElements, Thing t, bool __state)
     {
         isForcingTrackedArtifactRemoval = false;
 
@@ -73,6 +73,7 @@ internal static class ElementContainerPatch
             return;
         }
 
+        ApplyTrackedArtifactUnequipCorrection(t: t, charaElements: charaElements);
         UntrackAppliedArtifact(t: t);
         FeatureTestLog.Log(
             feature: "Unlock God Artifact Faction Effects",
@@ -122,7 +123,7 @@ internal static class ElementContainerPatch
                 {
                     if (shouldApply == false)
                     {
-                        charaElements.OnUnequip(t: artifact);
+                        RemoveTrackedArtifactForRefresh(t: artifact, charaElements: charaElements);
                         changed = true;
                         FeatureTestLog.Log(
                             feature: "Unlock God Artifact Faction Effects",
@@ -133,7 +134,7 @@ internal static class ElementContainerPatch
                     }
 
                     if (shouldApply == true &&
-                        TrackAppliedArtifact(t: artifact) == true)
+                        RefreshTrackedArtifactBonuses(t: artifact, charaElements: charaElements) == true)
                     {
                         changed = true;
                     }
@@ -322,11 +323,11 @@ internal static class ElementContainerPatch
     private static bool TrackAppliedArtifact(Thing t)
     {
         FaithSaveData.Current.EnsureCollections();
-        Dictionary<int, int> bonuses = CaptureGlobalElementBonuses(t: t);
+        Dictionary<int, GlobalElementBonus> bonuses = CaptureGlobalElementBonuses(t: t);
         bool addedId = FaithSaveData.Current.AppliedJoinedArtifactIds.Add(item: t.uid);
         bool changedBonuses = SetAppliedArtifactBonuses(
             artifactId: t.uid,
-            bonuses: bonuses);
+            bonuses: ToSavedBonuses(bonuses: bonuses));
 
         if (addedId == true ||
             changedBonuses == true)
@@ -336,6 +337,43 @@ internal static class ElementContainerPatch
         }
 
         return false;
+    }
+
+    private static bool RefreshTrackedArtifactBonuses(Thing t, ElementContainerFaction charaElements)
+    {
+        FaithSaveData.Current.EnsureCollections();
+        Dictionary<int, GlobalElementBonus> newBonuses = CaptureGlobalElementBonuses(t: t);
+        bool changedFactionBonuses = ApplyTrackedArtifactBonusDeltas(
+            charaElements: charaElements,
+            artifactId: t.uid,
+            newBonuses: newBonuses);
+        bool changedBonuses = SetAppliedArtifactBonuses(
+            artifactId: t.uid,
+            bonuses: ToSavedBonuses(bonuses: newBonuses));
+
+        if (changedFactionBonuses == true ||
+            changedBonuses == true)
+        {
+            SnapshotIfNotRefreshing();
+            return true;
+        }
+
+        return false;
+    }
+
+    private static void RemoveTrackedArtifactForRefresh(Thing t, ElementContainerFaction charaElements)
+    {
+        bool applyVanillaEffect = ShouldUseVanillaArtifactEffect(t: t);
+        RemoveAppliedArtifactBonuses(
+            charaElements: charaElements,
+            artifactId: t.uid);
+        UntrackAppliedArtifact(t: t);
+
+        if (applyVanillaEffect == true &&
+            HasGlobalElement(t: t) == true)
+        {
+            charaElements.OnEquip(t: t);
+        }
     }
 
     private static void UntrackAppliedArtifact(Thing t)
@@ -367,9 +405,9 @@ internal static class ElementContainerPatch
         return FaithSaveData.Current.AppliedJoinedArtifactIds.Contains(item: t.uid);
     }
 
-    private static Dictionary<int, int> CaptureGlobalElementBonuses(Thing t)
+    private static Dictionary<int, GlobalElementBonus> CaptureGlobalElementBonuses(Thing t)
     {
-        Dictionary<int, int> bonuses = new Dictionary<int, int>();
+        Dictionary<int, GlobalElementBonus> bonuses = new Dictionary<int, GlobalElementBonus>();
 
         if (t.elements == null)
         {
@@ -383,16 +421,31 @@ internal static class ElementContainerPatch
                 continue;
             }
 
-            if (bonuses.TryGetValue(key: element.id, value: out int currentValue) == true)
+            if (bonuses.TryGetValue(key: element.id, value: out GlobalElementBonus? currentBonus) == true &&
+                currentBonus != null)
             {
-                bonuses[key: element.id] = currentValue + element.Value;
+                currentBonus.Value += element.Value;
+                currentBonus.VExp = element.vExp;
                 continue;
             }
 
-            bonuses[key: element.id] = element.Value;
+            bonuses[key: element.id] = new GlobalElementBonus(
+                value: element.Value,
+                vExp: element.vExp);
         }
 
         return bonuses;
+    }
+
+    private static Dictionary<int, int> ToSavedBonuses(Dictionary<int, GlobalElementBonus> bonuses)
+    {
+        Dictionary<int, int> savedBonuses = new Dictionary<int, int>();
+        foreach (KeyValuePair<int, GlobalElementBonus> pair in bonuses)
+        {
+            savedBonuses[key: pair.Key] = pair.Value.Value;
+        }
+
+        return savedBonuses;
     }
 
     private static bool SetAppliedArtifactBonuses(int artifactId, Dictionary<int, int> bonuses)
@@ -407,6 +460,78 @@ internal static class ElementContainerPatch
 
         FaithSaveData.Current.AppliedJoinedArtifactBonuses[key: artifactId] = bonuses;
         return true;
+    }
+
+    private static bool ApplyTrackedArtifactBonusDeltas(
+        ElementContainerFaction charaElements,
+        int artifactId,
+        Dictionary<int, GlobalElementBonus> newBonuses)
+    {
+        if (FaithSaveData.Current.AppliedJoinedArtifactBonuses.TryGetValue(
+                key: artifactId,
+                value: out Dictionary<int, int>? oldBonuses) == false ||
+            oldBonuses == null)
+        {
+            return false;
+        }
+
+        bool changed = false;
+        foreach (KeyValuePair<int, GlobalElementBonus> pair in newBonuses)
+        {
+            int oldValue = 0;
+            if (oldBonuses.TryGetValue(key: pair.Key, value: out int savedValue) == true)
+            {
+                oldValue = savedValue;
+            }
+
+            int delta = pair.Value.Value - oldValue;
+            if (delta == 0)
+            {
+                Element? existingElement = charaElements.GetElement(id: pair.Key);
+                if (existingElement != null &&
+                    existingElement.vExp != pair.Value.VExp)
+                {
+                    existingElement.vExp = pair.Value.VExp;
+                    charaElements.isDirty = true;
+                    changed = true;
+                }
+
+                continue;
+            }
+
+            Element changedElement = charaElements.ModBase(ele: pair.Key, v: delta);
+            changedElement.vExp = pair.Value.VExp;
+            charaElements.isDirty = true;
+            changed = true;
+        }
+
+        foreach (KeyValuePair<int, int> pair in oldBonuses)
+        {
+            if (newBonuses.ContainsKey(key: pair.Key) == true)
+            {
+                continue;
+            }
+
+            charaElements.ModBase(ele: pair.Key, v: -pair.Value);
+            charaElements.isDirty = true;
+            changed = true;
+        }
+
+        if (changed == true)
+        {
+            charaElements.CheckDirty();
+        }
+
+        return changed;
+    }
+
+    private static void ApplyTrackedArtifactUnequipCorrection(Thing t, ElementContainerFaction charaElements)
+    {
+        Dictionary<int, GlobalElementBonus> currentBonuses = CaptureGlobalElementBonuses(t: t);
+        ApplyTrackedArtifactBonusDeltas(
+            charaElements: charaElements,
+            artifactId: t.uid,
+            newBonuses: currentBonuses);
     }
 
     private static bool AreBonusesEqual(Dictionary<int, int>? left, Dictionary<int, int> right)
@@ -477,6 +602,21 @@ internal static class ElementContainerPatch
         return false;
     }
 
+    private static bool ShouldUseVanillaArtifactEffect(Thing t)
+    {
+        if (string.IsNullOrWhiteSpace(value: t.c_idDeity) == true)
+        {
+            return true;
+        }
+
+        if (t.c_idDeity == GetCurrentFaithId())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     private static string? GetCurrentFaithId()
     {
         Game? game = EClass.core?.game;
@@ -488,5 +628,18 @@ internal static class ElementContainerPatch
         }
 
         return playerChara.idFaith;
+    }
+
+    private sealed class GlobalElementBonus
+    {
+        internal GlobalElementBonus(int value, int vExp)
+        {
+            Value = value;
+            VExp = vExp;
+        }
+
+        internal int Value { get; set; }
+
+        internal int VExp { get; set; }
     }
 }

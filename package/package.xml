@@ -23,8 +23,7 @@
     [/list]
 
     [h1] Compatibility [/h1]
-    God progress is saved per save file in:
-    [code] SaveFolder\OmegasGodTweaksFaithState.json [/code]
+    God progress is stored in the current save.
     Saved god progress includes each god's piety, days with god, joined state, reward rank, and repeat reward history.
     When enabled, this mod can remove offering piety caps and preserve overflow, but it does not add multiple piety level-ups from one offering by itself. If NoGainExpLimit is installed, that mod can handle multiple piety level-ups from very large offerings.
 
@@ -54,8 +53,7 @@
     [/list]
 
     [h1] 互換性 [/h1]
-    神ごとの進行はセーブごとに以下へ保存されます。
-    [code] SaveFolder\OmegasGodTweaksFaithState.json [/code]
+    神ごとの進行は現在のセーブに保存されます。
     保存される神ごとの進行には、信仰心、信仰日数、加入状態、報酬ランク、再入手報酬履歴が含まれます。
     有効にすると、このMODは捧げ物による信仰心上限を解除し、あふれた分を保持できますが、1回の捧げ物で複数レベル上がる処理自体は追加しません。NoGainExpLimit が導入されている場合、非常に大きな捧げ物による複数レベル上昇はそちらが処理できます。
 

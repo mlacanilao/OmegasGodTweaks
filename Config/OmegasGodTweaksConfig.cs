@@ -47,9 +47,9 @@ internal static class OmegasGodTweaksConfig
             section: Section,
             key: "Allow Joining Multiple Religions",
             defaultValue: false,
-            description: "Lets previous gods stay joined when converting. Each joined god keeps its own saved piety, days with god, and reward history in the current local save, and that progress is restored when switching back. Faith skill remains the player's normal global skill. Turning this off does not delete saved progress. Steam Cloud may not include this mod's save JSON.\n" +
-                         "改宗時に以前の神との加入状態を残します。加入済みの神ごとの信仰心、信仰日数、報酬履歴は現在のローカルセーブに保存され、戻った時に復元されます。信仰スキルはプレイヤーの通常の共通スキルのままです。オフにしても保存済みの進行は削除されません。Steam Cloud にはこのMODのセーブJSONが含まれない場合があります。\n" +
-                         "允许改宗后保留已加入神明。每位已加入神明的虔诚、信仰天数和奖励记录会保存在当前本地存档中，切换回来时会恢复。信仰技能仍是玩家通常的全局技能。关闭此项不会删除已保存的进度。Steam Cloud 可能不会包含本MOD的存档JSON。"
+            description: "Lets previous gods stay joined when converting. Each joined god keeps its own saved piety, days with god, and reward history in the current save, and that progress is restored when switching back. Faith skill remains the player's normal global skill. Turning this off does not delete saved progress.\n" +
+                         "改宗時に以前の神との加入状態を残します。加入済みの神ごとの信仰心、信仰日数、報酬履歴は現在のセーブに保存され、戻った時に復元されます。信仰スキルはプレイヤーの通常の共通スキルのままです。オフにしても保存済みの進行は削除されません。\n" +
+                         "允许改宗后保留已加入神明。每位已加入神明的虔诚、信仰天数和奖励记录会保存在当前存档中，切换回来时会恢复。信仰技能仍是玩家通常的全局技能。关闭此项不会删除已保存的进度。"
         );
 
         RemoveConversionPunishment = config.Bind(

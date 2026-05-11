@@ -7,47 +7,110 @@ namespace OmegasGodTweaks;
 
 internal static class FaithSaveData
 {
-    private const string FileName = "OmegasGodTweaksFaithState.json";
+    private const string ChunkName = "OmegasGodTweaksFaithState";
+    private const string LegacyFileName = "OmegasGodTweaksFaithState.json";
     private static FaithSaveModel current = new FaithSaveModel();
-    private static string loadedPath = string.Empty;
+    private static bool eventsRegistered;
+    private static bool loadFailed;
 
     internal static FaithSaveModel Current => current;
+
+    private enum ContextLoadResult
+    {
+        Loaded,
+        Missing,
+        Failed
+    }
+
+    internal static void RegisterGameIOEvents()
+    {
+        if (eventsRegistered == true)
+        {
+            return;
+        }
+
+        eventsRegistered = true;
+        BaseModManager.SubscribeEvent(eventId: EVENT.PostLoad, handler: OnPostLoad);
+        BaseModManager.SubscribeEvent(eventId: EVENT.PreSave, handler: OnPreSave);
+        BaseModManager.SubscribeEvent(eventId: EVENT.NewGame, handler: OnStartNewGame);
+    }
 
     internal static void ResetForNewGame()
     {
         current = new FaithSaveModel();
-        loadedPath = GetCurrentPath();
-        FeatureTestLog.Log(feature: "Save-Scoped Faith State", detail: "reset state for new game; path=" + loadedPath);
+        LogFeatureTestInfo(detail: "start-new reset received.");
     }
 
-    internal static void LoadCurrent()
+    internal static void LoadCurrent(GameIOContext? context)
     {
-        string path = GetCurrentPath();
-        loadedPath = path;
-        if (string.IsNullOrWhiteSpace(value: path) == true || File.Exists(path: path) == false)
+        if (context == null)
         {
             current = new FaithSaveModel();
-            FeatureTestLog.Log(feature: "Save-Scoped Faith State", detail: "loaded empty state; path=" + path);
+            loadFailed = false;
+            LogFeatureTestInfo(detail: "post-load event received with null context; source=empty.");
+            return;
+        }
+
+        LogFeatureTestInfo(detail: "post-load event received.");
+        ContextLoadResult contextLoadResult = TryLoadContext(context: context);
+        if (contextLoadResult == ContextLoadResult.Loaded)
+        {
+            loadFailed = false;
+            return;
+        }
+
+        if (contextLoadResult == ContextLoadResult.Missing)
+        {
+            ContextLoadResult legacyLoadResult = TryLoadLegacyJson(context: context);
+            if (legacyLoadResult == ContextLoadResult.Loaded)
+            {
+                loadFailed = false;
+                return;
+            }
+
+            if (legacyLoadResult == ContextLoadResult.Failed)
+            {
+                loadFailed = true;
+                current = new FaithSaveModel();
+                LogFeatureTestInfo(detail: "using empty in-memory state after failed legacy load; save will be skipped.");
+                return;
+            }
+        }
+
+        loadFailed = contextLoadResult == ContextLoadResult.Failed;
+        current = new FaithSaveModel();
+        LogFeatureTestInfo(detail: "loaded empty state; source=empty.");
+    }
+
+    internal static void SaveCurrent(GameIOContext? context)
+    {
+        if (context == null)
+        {
+            LogFeatureTestInfo(detail: "pre-save event received with null context; skipped save.");
+            return;
+        }
+
+        if (loadFailed == true)
+        {
+            LogFeatureTestInfo(detail: "pre-save event received after failed load; skipped save.");
             return;
         }
 
         try
         {
-            current = JsonConvert.DeserializeObject<FaithSaveModel>(value: File.ReadAllText(path: path)) ?? new FaithSaveModel();
+            LogFeatureTestInfo(detail: "pre-save event received.");
+            SnapshotCurrent();
             current.EnsureCollections();
-            FeatureTestLog.Log(
-                feature: "Save-Scoped Faith State",
-                detail: "loaded state; path=" +
-                        path +
-                        ", gods=" +
+            context.Save(chunkName: ChunkName, data: current, settings: null);
+            LogFeatureTestInfo(
+                detail: "saved context chunk; gods=" +
                         current.Gods.Count.ToString() +
                         ", appliedArtifacts=" +
                         current.AppliedJoinedArtifactIds.Count.ToString());
         }
         catch (Exception ex)
         {
-            current = new FaithSaveModel();
-            OmegasGodTweaks.LogDebug(message: $"Failed to load save-scoped faith state: {ex}");
+            OmegasGodTweaks.LogDebug(message: $"Failed to save faith state context chunk: {ex}");
         }
     }
 
@@ -56,41 +119,6 @@ internal static class FaithSaveData
         if (EClass.pc != null)
         {
             GodFaithStateService.SnapshotCurrentFaith(chara: EClass.pc, joined: true);
-        }
-    }
-
-    internal static void SaveCurrent()
-    {
-        try
-        {
-            SnapshotCurrent();
-
-            string path = GetCurrentPath();
-            if (string.IsNullOrWhiteSpace(value: path) == true)
-            {
-                return;
-            }
-
-            string? directory = Path.GetDirectoryName(path: path);
-            if (string.IsNullOrWhiteSpace(value: directory) == false)
-            {
-                Directory.CreateDirectory(path: directory!);
-            }
-
-            File.WriteAllText(path: path, contents: JsonConvert.SerializeObject(value: current, formatting: Formatting.Indented));
-            loadedPath = path;
-            FeatureTestLog.Log(
-                feature: "Save-Scoped Faith State",
-                detail: "saved state; path=" +
-                        path +
-                        ", gods=" +
-                        current.Gods.Count.ToString() +
-                        ", appliedArtifacts=" +
-                        current.AppliedJoinedArtifactIds.Count.ToString());
-        }
-        catch (Exception ex)
-        {
-            OmegasGodTweaks.LogDebug(message: $"Failed to save faith state: {ex}");
         }
     }
 
@@ -114,21 +142,140 @@ internal static class FaithSaveData
         return current.Gods.ContainsKey(key: godId);
     }
 
-    private static string GetCurrentPath()
+    private static void OnPostLoad(object context)
+    {
+        if (context is not GameIOContext gameIOContext)
+        {
+            LoadCurrent(context: null);
+            if (loadFailed == true)
+            {
+                return;
+            }
+
+            GodFaithStateService.ApplyLoadedState();
+            return;
+        }
+
+        LoadCurrent(context: gameIOContext);
+        if (loadFailed == true)
+        {
+            return;
+        }
+
+        GodFaithStateService.ApplyLoadedState();
+    }
+
+    private static void OnPreSave(object context)
+    {
+        if (context is not GameIOContext gameIOContext)
+        {
+            SaveCurrent(context: null);
+            return;
+        }
+
+        SaveCurrent(context: gameIOContext);
+    }
+
+    private static void OnStartNewGame(object context)
+    {
+        loadFailed = false;
+        ResetForNewGame();
+    }
+
+    private static ContextLoadResult TryLoadContext(GameIOContext context)
+    {
+        FileInfo? chunkFile;
+        try
+        {
+            chunkFile = context.GetChunkFile(chunkName: ChunkName);
+        }
+        catch (Exception ex)
+        {
+            OmegasGodTweaks.LogDebug(message: $"Failed to locate faith state context chunk: {ex}");
+            LogFeatureTestInfo(detail: "context chunk lookup failed; source=context.");
+            return ContextLoadResult.Failed;
+        }
+
+        if (chunkFile == null || chunkFile.Exists == false)
+        {
+            LogFeatureTestInfo(detail: "context chunk missing; source=context.");
+            return ContextLoadResult.Missing;
+        }
+
+        try
+        {
+            if (context.Load(chunkName: ChunkName, data: out FaithSaveModel loadedModel, settings: null) == false)
+            {
+                OmegasGodTweaks.LogDebug(message: "Faith state context chunk exists but did not load.");
+                LogFeatureTestInfo(detail: "context chunk load failed; source=context.");
+                return ContextLoadResult.Failed;
+            }
+
+            current = loadedModel ?? new FaithSaveModel();
+            current.EnsureCollections();
+            loadFailed = false;
+            LogFeatureTestInfo(
+                detail: "loaded state; source=context, gods=" +
+                        current.Gods.Count.ToString() +
+                        ", appliedArtifacts=" +
+                        current.AppliedJoinedArtifactIds.Count.ToString());
+            return ContextLoadResult.Loaded;
+        }
+        catch (Exception ex)
+        {
+            OmegasGodTweaks.LogDebug(message: $"Failed to load faith state context chunk: {ex}");
+            LogFeatureTestInfo(detail: "context chunk load failed; source=context.");
+            return ContextLoadResult.Failed;
+        }
+    }
+
+    private static ContextLoadResult TryLoadLegacyJson(GameIOContext context)
+    {
+        string path = GetLegacyPath(context: context);
+        if (string.IsNullOrWhiteSpace(value: path) == true || File.Exists(path: path) == false)
+        {
+            LogFeatureTestInfo(detail: "legacy JSON missing; source=legacy-json, path=" + path);
+            return ContextLoadResult.Missing;
+        }
+
+        try
+        {
+            current = JsonConvert.DeserializeObject<FaithSaveModel>(value: File.ReadAllText(path: path)) ?? new FaithSaveModel();
+            current.EnsureCollections();
+            loadFailed = false;
+            LogFeatureTestInfo(
+                detail: "loaded state; source=legacy-json, path=" +
+                        path +
+                        ", gods=" +
+                        current.Gods.Count.ToString() +
+                        ", appliedArtifacts=" +
+                        current.AppliedJoinedArtifactIds.Count.ToString());
+            return ContextLoadResult.Loaded;
+        }
+        catch (Exception ex)
+        {
+            current = new FaithSaveModel();
+            OmegasGodTweaks.LogDebug(message: $"Failed to load legacy faith state JSON: {ex}");
+            LogFeatureTestInfo(detail: "legacy JSON load failed; source=legacy-json, path=" + path);
+            return ContextLoadResult.Failed;
+        }
+    }
+
+    private static string GetLegacyPath(GameIOContext context)
     {
         try
         {
-            if (EClass.core?.game == null || string.IsNullOrWhiteSpace(value: Game.id) == true)
-            {
-                return loadedPath;
-            }
-
-            return Path.Combine(path1: GameIO.pathCurrentSave, path2: FileName);
+            return context.GetFullPath(relativePath: LegacyFileName);
         }
         catch
         {
-            return loadedPath;
+            return string.Empty;
         }
+    }
+
+    private static void LogFeatureTestInfo(string detail)
+    {
+        OmegasGodTweaks.LogDebug(message: "[FeatureTest] Save-Scoped Faith State: " + detail);
     }
 }
 
