@@ -45,6 +45,7 @@ internal static class GodFaithStateService
         }
 
         ApplyStateToPlayer(religion: EClass.pc.faith);
+        EClass.pc.RefreshFaithElement();
         ElementContainerPatch.RefreshAppliedArtifactEffects();
     }
 
