@@ -22,20 +22,39 @@ internal static class GodFaithStateService
     {
         if (EClass.pc == null || EClass.game?.religions == null)
         {
+            FeatureTestLog.Log(
+                feature: "Save-Scoped Faith State",
+                detail: "ApplyLoadedState skipped; pc or religions unavailable.");
             return;
         }
 
         FaithSaveData.Current.EnsureCollections();
         Religion currentFaith = EClass.pc.faith;
+        FeatureTestLog.Log(
+            feature: "Save-Scoped Faith State",
+            detail: "ApplyLoadedState start; allowMulti=" +
+                    OmegasGodTweaksConfig.AllowJoiningMultipleReligions.Value.ToString() +
+                    ", gods=" +
+                    FaithSaveData.Current.Gods.Count.ToString() +
+                    ", " +
+                    FeatureTestLog.GetFaithSnapshot(chara: EClass.pc));
+
         if (currentFaith != null &&
             string.IsNullOrWhiteSpace(value: currentFaith.id) == false &&
             FaithSaveData.HasState(godId: currentFaith.id) == false)
         {
+            FeatureTestLog.Log(
+                feature: "Save-Scoped Faith State",
+                detail: "current faith had no saved state on load; snapshotting live state for god=" +
+                        FeatureTestLog.GetReligionId(religion: currentFaith));
             SnapshotCurrentFaith(chara: EClass.pc, joined: true);
         }
 
         if (OmegasGodTweaksConfig.AllowJoiningMultipleReligions.Value == false)
         {
+            FeatureTestLog.Log(
+                feature: "Save-Scoped Faith State",
+                detail: "ApplyLoadedState stopped before restoring joined states because Allow Joining Multiple Religions is disabled.");
             return;
         }
 
@@ -44,15 +63,32 @@ internal static class GodFaithStateService
             Religion religion = EClass.game.religions.Find(id: pair.Key);
             if (religion == null || pair.Value == null)
             {
+                FeatureTestLog.Log(
+                    feature: "Save-Scoped Faith State",
+                    detail: "saved god entry skipped during load apply; godId=" +
+                            (pair.Key ?? "<empty>") +
+                            ", hasReligion=" +
+                            (religion != null).ToString() +
+                            ", hasState=" +
+                            (pair.Value != null).ToString());
                 continue;
             }
 
             religion.giftRank = pair.Value.GiftRank;
+            FeatureTestLog.Log(
+                feature: "Save-Scoped Faith State",
+                detail: "restored religion giftRank from save; god=" +
+                        FeatureTestLog.GetReligionId(religion: religion) +
+                        ", giftRank=" +
+                        pair.Value.GiftRank.ToString());
         }
 
         ApplyStateToPlayer(religion: currentFaith);
         EClass.pc.RefreshFaithElement();
         ElementContainerPatch.RefreshAppliedArtifactEffects();
+        FeatureTestLog.Log(
+            feature: "Save-Scoped Faith State",
+            detail: "ApplyLoadedState complete; " + FeatureTestLog.GetFaithSnapshot(chara: EClass.pc));
     }
 
     internal static bool IsJoined(Religion? religion)
@@ -105,10 +141,18 @@ internal static class GodFaithStateService
     {
         if (chara == null || religion == null)
         {
+            FeatureTestLog.Log(
+                feature: "Save-Scoped Faith State",
+                detail: "SnapshotFaith skipped; chara or religion null.");
             return;
         }
 
+        bool hadState = FaithSaveData.HasState(godId: religion.id);
         GodFaithState state = FaithSaveData.GetOrCreateState(godId: religion.id);
+        int previousPietyBase = state.PietyBase;
+        int previousPietyExp = state.PietyExp;
+        int previousWorshipDays = state.WorshipDays;
+        int previousGiftRank = state.GiftRank;
         state.Joined = joined;
         state.WorshipDays = chara.c_daysWithGod;
         state.GiftRank = religion.giftRank;
@@ -116,6 +160,103 @@ internal static class GodFaithStateService
         Element piety = chara.elements.GetOrCreateElement(id: PietyElementId);
         state.PietyBase = piety.vBase;
         state.PietyExp = piety.vExp;
+
+        if (ShouldPreserveExistingProgressMetadataWhileMultiDisabled(hadState: hadState) == true)
+        {
+            state.WorshipDays = Math.Max(val1: state.WorshipDays, val2: previousWorshipDays);
+            state.GiftRank = Math.Max(val1: state.GiftRank, val2: previousGiftRank);
+        }
+
+        if (ShouldPreserveExistingProgressWhileMultiDisabled(
+                hadState: hadState,
+                livePietyBase: piety.vBase,
+                livePietyExp: piety.vExp,
+                savedPietyBase: previousPietyBase,
+                savedPietyExp: previousPietyExp) == true)
+        {
+            PreserveExistingProgress(
+                state: state,
+                previousPietyBase: previousPietyBase,
+                previousPietyExp: previousPietyExp,
+                previousWorshipDays: previousWorshipDays,
+                previousGiftRank: previousGiftRank,
+                religion: religion);
+        }
+
+        FeatureTestLog.Log(
+            feature: "Save-Scoped Faith State",
+            detail: "SnapshotFaith; god=" +
+                    FeatureTestLog.GetReligionId(religion: religion) +
+                    ", hadState=" +
+                    hadState.ToString() +
+                    ", joined=" +
+                    joined.ToString() +
+                    ", " +
+                    FeatureTestLog.GetSavedState(godId: religion.id));
+    }
+
+    private static bool ShouldPreserveExistingProgressWhileMultiDisabled(
+        bool hadState,
+        int livePietyBase,
+        int livePietyExp,
+        int savedPietyBase,
+        int savedPietyExp)
+    {
+        if (hadState == false)
+        {
+            return false;
+        }
+
+        if (OmegasGodTweaksConfig.AllowJoiningMultipleReligions.Value == true)
+        {
+            return false;
+        }
+
+        if (livePietyBase < savedPietyBase)
+        {
+            return true;
+        }
+
+        return livePietyBase == savedPietyBase && livePietyExp < savedPietyExp;
+    }
+
+    private static bool ShouldPreserveExistingProgressMetadataWhileMultiDisabled(bool hadState)
+    {
+        if (hadState == false)
+        {
+            return false;
+        }
+
+        if (OmegasGodTweaksConfig.AllowJoiningMultipleReligions.Value == true)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static void PreserveExistingProgress(
+        GodFaithState state,
+        int previousPietyBase,
+        int previousPietyExp,
+        int previousWorshipDays,
+        int previousGiftRank,
+        Religion religion)
+    {
+        state.PietyBase = previousPietyBase;
+        state.PietyExp = previousPietyExp;
+        state.WorshipDays = Math.Max(val1: state.WorshipDays, val2: previousWorshipDays);
+        state.GiftRank = Math.Max(val1: state.GiftRank, val2: previousGiftRank);
+        FeatureTestLog.Log(
+            feature: "Save-Scoped Faith State",
+            detail: "preserved existing saved progress while Allow Joining Multiple Religions is disabled; god=" +
+                    FeatureTestLog.GetReligionId(religion: religion) +
+                    ", live=" +
+                    FeatureTestLog.GetFaithSnapshot(chara: EClass.pc) +
+                    ", savedPietyBase=" +
+                    previousPietyBase.ToString() +
+                    ", savedPietyExp=" +
+                    previousPietyExp.ToString());
     }
 
     internal static void MarkJoined(Religion religion)
@@ -123,13 +264,25 @@ internal static class GodFaithStateService
         GodFaithState state = FaithSaveData.GetOrCreateState(godId: religion.id);
         state.Joined = true;
         state.GiftRank = religion.giftRank;
+        FeatureTestLog.Log(
+            feature: "Save-Scoped Faith State",
+            detail: "MarkJoined; god=" +
+                    FeatureTestLog.GetReligionId(religion: religion) +
+                    ", " +
+                    FeatureTestLog.GetSavedState(godId: religion.id));
     }
 
     internal static void MarkLeft(Religion religion)
     {
         GodFaithState state = FaithSaveData.GetOrCreateState(godId: religion.id);
         state.Joined = false;
-        state.GiftRank = religion.giftRank;
+        state.GiftRank = Math.Max(val1: state.GiftRank, val2: religion.giftRank);
+        FeatureTestLog.Log(
+            feature: "Save-Scoped Faith State",
+            detail: "MarkLeft; god=" +
+                    FeatureTestLog.GetReligionId(religion: religion) +
+                    ", " +
+                    FeatureTestLog.GetSavedState(godId: religion.id));
     }
 
     internal static void ClearPlayerPiety()
@@ -141,16 +294,44 @@ internal static class GodFaithStateService
 
         Chara pc = EClass.pc;
         Element piety = pc.elements.GetOrCreateElement(id: PietyElementId);
+        FeatureTestLog.Log(
+            feature: "Save-Scoped Faith State",
+            detail: "ClearPlayerPiety before; " + FeatureTestLog.GetFaithSnapshot(chara: pc));
         piety.vBase = 0;
         piety.vExp = 0;
         piety.OnChangeValue();
         pc.RefreshFaithElement();
+        FeatureTestLog.Log(
+            feature: "Save-Scoped Faith State",
+            detail: "ClearPlayerPiety after; " + FeatureTestLog.GetFaithSnapshot(chara: pc));
     }
 
     internal static void ApplyStateToPlayer(Religion religion)
     {
-        if (EClass.pc == null || religion == null || FaithSaveData.HasState(godId: religion.id) == false)
+        if (EClass.pc == null)
         {
+            FeatureTestLog.Log(
+                feature: "Save-Scoped Faith State",
+                detail: "ApplyStateToPlayer skipped; pc unavailable.");
+            return;
+        }
+
+        if (religion == null)
+        {
+            FeatureTestLog.Log(
+                feature: "Save-Scoped Faith State",
+                detail: "ApplyStateToPlayer skipped; religion null.");
+            return;
+        }
+
+        if (FaithSaveData.HasState(godId: religion.id) == false)
+        {
+            FeatureTestLog.Log(
+                feature: "Save-Scoped Faith State",
+                detail: "ApplyStateToPlayer skipped; no saved state for god=" +
+                        FeatureTestLog.GetReligionId(religion: religion) +
+                        ", live=" +
+                        FeatureTestLog.GetFaithSnapshot(chara: EClass.pc));
             return;
         }
 
@@ -280,8 +461,20 @@ internal static class GodFaithStateService
 
         if (religions?.list == null)
         {
+            FeatureTestLog.Log(
+                feature: "Apply Joined God Bonuses",
+                detail: "skipped; religion list unavailable.");
             return;
         }
+
+        FeatureTestLog.Log(
+            feature: "Apply Joined God Bonuses",
+            detail: "begin joined bonus refresh; current=" +
+                    FeatureTestLog.GetReligionId(religion: chara.faith) +
+                    ", hasDemigod=" +
+                    chara.HasElement(ele: DemigodFeatElementId, includeNagative: false).ToString() +
+                    ", savedGods=" +
+                    FaithSaveData.Current.Gods.Count.ToString());
 
         foreach (Religion religion in religions.list)
         {
@@ -295,12 +488,24 @@ internal static class GodFaithStateService
                 continue;
             }
 
+            if (religion.IsEyth == true &&
+                chara.HasElement(ele: DemigodFeatElementId, includeNagative: false) == false)
+            {
+                FeatureTestLog.Log(
+                    feature: "Eyth / Demigod Edge Cases",
+                    detail: "skipped joined non-current Eyth because player does not have Demigod; currentFaith=" +
+                            FeatureTestLog.GetReligionId(religion: chara.faith) +
+                            ", hasDemigod=" +
+                            chara.HasElement(ele: DemigodFeatElementId, includeNagative: false).ToString());
+                continue;
+            }
+
             if (religion.IsEyth == true)
             {
                 FeatureTestLog.Log(
                     feature: "Eyth / Demigod Edge Cases",
-                    detail: "skipped joined Eyth in joined faith bonus loop.");
-                continue;
+                    detail: "allowed joined non-current Eyth because player has Demigod; currentFaith=" +
+                            FeatureTestLog.GetReligionId(religion: chara.faith));
             }
 
             if (IsJoined(religion: religion) == false)
@@ -362,13 +567,26 @@ internal static class GodFaithStateService
             return false;
         }
 
+        if (string.Equals(a: chara.idFaith, b: EythReligionId, comparisonType: StringComparison.OrdinalIgnoreCase) == true)
+        {
+            FeatureTestLog.Log(
+                feature: "Eyth / Demigod Edge Cases",
+                detail: "current faith is Eyth with Demigod; vanilla current Eyth faith bonus flow and joined non-Eyth bonus loop are allowed.");
+        }
+
         if (EClass.sources.religions.map.ContainsKey(key: chara.idFaith) == false)
         {
+            FeatureTestLog.Log(
+                feature: "Apply Joined God Bonuses",
+                detail: "skipped; current faith source row missing for idFaith=" + (chara.idFaith ?? "<empty>"));
             return false;
         }
 
         if (chara.HasCondition<ConExcommunication>() == true)
         {
+            FeatureTestLog.Log(
+                feature: "Apply Joined God Bonuses",
+                detail: "skipped; player has excommunication condition.");
             return false;
         }
 
@@ -399,11 +617,17 @@ internal static class GodFaithStateService
     {
         if (FaithSaveData.HasState(godId: religion.id) == false)
         {
+            FeatureTestLog.Log(
+                feature: "Apply Joined God Bonuses",
+                detail: "skipped joined god without saved state; god=" + FeatureTestLog.GetReligionId(religion: religion));
             return;
         }
 
         if (EClass.sources.religions.map.TryGetValue(key: religion.id, value: out SourceReligion.Row row) == false)
         {
+            FeatureTestLog.Log(
+                feature: "Apply Joined God Bonuses",
+                detail: "skipped joined god with missing source row; god=" + FeatureTestLog.GetReligionId(religion: religion));
             return;
         }
 
@@ -467,10 +691,21 @@ internal static class GodFaithStateService
     {
         if (EClass.pc == null)
         {
+            FeatureTestLog.Log(
+                feature: "Save-Scoped Faith State",
+                detail: "ApplyStateToPlayer internal skipped; pc unavailable.");
             return;
         }
 
         Chara pc = EClass.pc;
+        FeatureTestLog.Log(
+            feature: "Save-Scoped Faith State",
+            detail: "ApplyStateToPlayer before; god=" +
+                    FeatureTestLog.GetReligionId(religion: religion) +
+                    ", live=" +
+                    FeatureTestLog.GetFaithSnapshot(chara: pc) +
+                    ", " +
+                    FeatureTestLog.GetSavedState(godId: religion.id));
         applyingState = true;
         try
         {
@@ -486,5 +721,12 @@ internal static class GodFaithStateService
         {
             applyingState = false;
         }
+
+        FeatureTestLog.Log(
+            feature: "Save-Scoped Faith State",
+            detail: "ApplyStateToPlayer after; god=" +
+                    FeatureTestLog.GetReligionId(religion: religion) +
+                    ", live=" +
+                    FeatureTestLog.GetFaithSnapshot(chara: pc));
     }
 }

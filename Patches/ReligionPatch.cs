@@ -148,7 +148,26 @@ internal static class ReligionPatch
 
         bool isChangingFaith = c.faith != religion;
         GodFaithStateService.SnapshotCurrentFaith(chara: c, joined: true);
-        return ShouldClearFreshPietyAfterJoin(isChangingFaith: isChangingFaith, oldFaith: c.faith, newFaith: religion);
+        bool shouldClearFreshPiety = ShouldClearFreshPietyAfterJoin(isChangingFaith: isChangingFaith, oldFaith: c.faith, newFaith: religion);
+        FeatureTestLog.Log(
+            feature: "Faith Conversion Flow",
+            detail: "JoinFaith prefix; type=" +
+                    type.ToString() +
+                    ", oldFaith=" +
+                    FeatureTestLog.GetReligionId(religion: c.faith) +
+                    ", newFaith=" +
+                    FeatureTestLog.GetReligionId(religion: religion) +
+                    ", isChangingFaith=" +
+                    isChangingFaith.ToString() +
+                    ", shouldClearFreshPiety=" +
+                    shouldClearFreshPiety.ToString() +
+                    ", oldLive=" +
+                    FeatureTestLog.GetFaithSnapshot(chara: c) +
+                    ", newHadSavedState=" +
+                    FaithSaveData.HasState(godId: religion.id).ToString() +
+                    ", newSaved=" +
+                    FeatureTestLog.GetSavedState(godId: religion.id));
+        return shouldClearFreshPiety;
     }
 
     internal static void JoinFaithPostfix(Religion religion, Chara c, Religion.ConvertType type, bool shouldClearFreshPiety)
@@ -166,6 +185,22 @@ internal static class ReligionPatch
         bool hadSavedProgress = FaithSaveData.HasState(godId: religion.id);
         GodFaithState state = FaithSaveData.GetOrCreateState(godId: religion.id);
         state.Joined = true;
+        FeatureTestLog.Log(
+            feature: "Faith Conversion Flow",
+            detail: "JoinFaith postfix start; type=" +
+                    type.ToString() +
+                    ", newFaith=" +
+                    FeatureTestLog.GetReligionId(religion: religion) +
+                    ", allowMulti=" +
+                    OmegasGodTweaksConfig.AllowJoiningMultipleReligions.Value.ToString() +
+                    ", hadSavedProgress=" +
+                    hadSavedProgress.ToString() +
+                    ", shouldClearFreshPiety=" +
+                    shouldClearFreshPiety.ToString() +
+                    ", liveAfterVanilla=" +
+                    FeatureTestLog.GetFaithSnapshot(chara: c) +
+                    ", savedBeforeApply=" +
+                    FeatureTestLog.GetSavedState(godId: religion.id));
 
         if (hadSavedProgress == true && OmegasGodTweaksConfig.AllowJoiningMultipleReligions.Value == true)
         {
@@ -183,6 +218,14 @@ internal static class ReligionPatch
         GodFaithStateService.SnapshotFaith(chara: c, religion: religion, joined: true);
         ElementContainerPatch.RefreshAppliedArtifactEffects();
         FaithSaveData.SnapshotCurrent();
+        FeatureTestLog.Log(
+            feature: "Faith Conversion Flow",
+            detail: "JoinFaith postfix complete; newFaith=" +
+                    FeatureTestLog.GetReligionId(religion: religion) +
+                    ", liveFinal=" +
+                    FeatureTestLog.GetFaithSnapshot(chara: c) +
+                    ", savedFinal=" +
+                    FeatureTestLog.GetSavedState(godId: religion.id));
     }
 
     internal static bool LeaveFaithPrefix(Religion religion, Chara c, Religion newFaith, Religion.ConvertType type)
@@ -200,12 +243,40 @@ internal static class ReligionPatch
         if (ShouldReplaceLeaveFaith() == false)
         {
             GodFaithStateService.SnapshotFaith(chara: c, religion: religion, joined: false);
+            FeatureTestLog.Log(
+                feature: "Faith Conversion Flow",
+                detail: "LeaveFaith prefix using vanilla path; oldFaith=" +
+                        FeatureTestLog.GetReligionId(religion: religion) +
+                        ", newFaith=" +
+                        FeatureTestLog.GetReligionId(religion: newFaith) +
+                        ", type=" +
+                        type.ToString() +
+                        ", oldSaved=" +
+                        FeatureTestLog.GetSavedState(godId: religion.id));
             return true;
         }
 
         GodFaithStateService.SnapshotFaith(chara: c, religion: religion, joined: true);
 
         bool moonShadowTrickerySwap = IsMoonShadowTrickerySwap(oldFaith: religion, newFaith: newFaith);
+        FeatureTestLog.Log(
+            feature: "Faith Conversion Flow",
+            detail: "LeaveFaith prefix replacing vanilla path; oldFaith=" +
+                    FeatureTestLog.GetReligionId(religion: religion) +
+                    ", newFaith=" +
+                    FeatureTestLog.GetReligionId(religion: newFaith) +
+                    ", type=" +
+                    type.ToString() +
+                    ", allowMulti=" +
+                    OmegasGodTweaksConfig.AllowJoiningMultipleReligions.Value.ToString() +
+                    ", removePunishment=" +
+                    OmegasGodTweaksConfig.RemoveConversionPunishment.Value.ToString() +
+                    ", moonShadowTrickerySwap=" +
+                    moonShadowTrickerySwap.ToString() +
+                    ", liveBeforeLeave=" +
+                    FeatureTestLog.GetFaithSnapshot(chara: c) +
+                    ", oldSaved=" +
+                    FeatureTestLog.GetSavedState(godId: religion.id));
 
         if (religion.IsEyth == false)
         {
@@ -250,6 +321,16 @@ internal static class ReligionPatch
         c.faction.charaElements.OnLeaveFaith();
         religion.OnLeaveFaith();
         c.RefreshFaithElement();
+        FeatureTestLog.Log(
+            feature: "Faith Conversion Flow",
+            detail: "LeaveFaith prefix complete; oldFaith=" +
+                    FeatureTestLog.GetReligionId(religion: religion) +
+                    ", newFaith=" +
+                    FeatureTestLog.GetReligionId(religion: newFaith) +
+                    ", liveAfterLeave=" +
+                    FeatureTestLog.GetFaithSnapshot(chara: c) +
+                    ", oldSaved=" +
+                    FeatureTestLog.GetSavedState(godId: religion.id));
         return false;
     }
 

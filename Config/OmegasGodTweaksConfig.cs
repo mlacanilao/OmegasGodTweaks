@@ -47,9 +47,9 @@ internal static class OmegasGodTweaksConfig
             section: Section,
             key: "Allow Joining Multiple Religions",
             defaultValue: false,
-            description: "Lets previous gods stay joined when converting. Each joined god keeps its own saved piety, days with god, and reward history in the current save, and that progress is restored when switching back. Faith skill remains the player's normal global skill. Turning this off does not delete saved progress.\n" +
-                         "改宗時に以前の神との加入状態を残します。加入済みの神ごとの信仰心、信仰日数、報酬履歴は現在のセーブに保存され、戻った時に復元されます。信仰スキルはプレイヤーの通常の共通スキルのままです。オフにしても保存済みの進行は削除されません。\n" +
-                         "允许改宗后保留已加入神明。每位已加入神明的虔诚、信仰天数和奖励记录会保存在当前存档中，切换回来时会恢复。信仰技能仍是玩家通常的全局技能。关闭此项不会删除已保存的进度。"
+            description: "Lets previous gods stay joined when converting. Each joined god keeps its own saved piety, days with god, and reward history in the current save, and that progress is restored when switching back while this setting is enabled. This can only preserve progress after the mod has seen that god in this save; vanilla does not keep recoverable piety for gods left before installing the mod. When this is off, previous gods do not count as joined and their saved progress is ignored for gameplay, but saved progress is not deleted or reduced.\n" +
+                         "改宗時に以前の神との加入状態を残します。加入済みの神ごとの信仰心、信仰日数、報酬履歴は現在のセーブに保存され、この設定が有効な間は戻った時に復元されます。このMODがそのセーブ内で確認した後の進行だけを保持できます。導入前に離れた神の信仰心は、バニラ側に復元できる形では残りません。オフの間、以前の神は加入済みとして扱われず、保存済み進行はゲームプレイでは無視されますが、削除されたり減らされたりはしません。\n" +
+                         "允许改宗后保留已加入神明。每位已加入神明的虔诚、信仰天数和奖励记录会保存在当前存档中，并在此项启用时切换回来后恢复。只能保留本MOD在该存档中见过该神明之后的进度；原版不会保存安装前已离开神明的可恢复虔诚。关闭此项时，之前的神明不会被视为已加入，其保存进度会在玩法中被忽略，但不会被删除或降低。"
         );
 
         RemoveConversionPunishment = config.Bind(
@@ -74,9 +74,9 @@ internal static class OmegasGodTweaksConfig
             section: Section,
             key: "Allow Offerings For Joined Non-Current Gods",
             defaultValue: false,
-            description: "Lets offerings at a joined god's own altar increase that god's piety, even when that god is not the current faith.\n" +
-                         "現在信仰していない加入済みの神でも、その神自身の祭壇で捧げ物をするとその神の信仰心を増やせます。\n" +
-                         "允许在已加入神明自己的祭坛献祭并增加该神明的虔诚，即使该神明不是当前信仰。"
+            description: "Lets offerings at a joined god's own altar increase that god's piety, even when that god is not the current faith. Non-current gods require Allow Joining Multiple Religions and saved joined state.\n" +
+                         "現在信仰していない加入済みの神でも、その神自身の祭壇で捧げ物をするとその神の信仰心を増やせます。現在信仰ではない神には Allow Joining Multiple Religions と保存済み加入状態が必要です。\n" +
+                         "允许在已加入神明自己的祭坛献祭并增加该神明的虔诚，即使该神明不是当前信仰。非当前神明需要启用 Allow Joining Multiple Religions 并已有保存的加入状态。"
         );
 
         RemoveOfferingCategoryRestrictions = config.Bind(
@@ -155,9 +155,9 @@ internal static class OmegasGodTweaksConfig
             section: Section,
             key: "Apply Prayer Piety To Joined Gods",
             defaultValue: false,
-            description: "Also applies prayer piety gain to joined non-current gods.\n" +
-                         "祈りで得る信仰心を、現在信仰していない加入済みの神にも適用します。\n" +
-                         "也将祈祷获得的虔诚应用到已加入但非当前信仰的神明。"
+            description: "Also applies prayer piety gain to joined non-current gods. Non-current gods require Allow Joining Multiple Religions and saved joined state.\n" +
+                         "祈りで得る信仰心を、現在信仰していない加入済みの神にも適用します。現在信仰ではない神には Allow Joining Multiple Religions と保存済み加入状態が必要です。\n" +
+                         "也将祈祷获得的虔诚应用到已加入但非当前信仰的神明。非当前神明需要启用 Allow Joining Multiple Religions 并已有保存的加入状态。"
         );
 
         AllowPassivePrayerPietyGain = config.Bind(
@@ -173,9 +173,9 @@ internal static class OmegasGodTweaksConfig
             section: Section,
             key: "Allow Prayer Reward Checks For Joined Gods",
             defaultValue: false,
-            description: "Allows prayer to check rewards for joined gods, not only the current faith.\n" +
-                         "祈りで現在の信仰だけでなく加入済みの神の報酬も確認します。\n" +
-                         "祈祷时也会检查已加入神明的奖励。"
+            description: "Allows prayer to check rewards for joined gods, not only the current faith. Non-current gods require Allow Joining Multiple Religions and saved joined state.\n" +
+                         "祈りで現在の信仰だけでなく加入済みの神の報酬も確認します。現在信仰ではない神には Allow Joining Multiple Religions と保存済み加入状態が必要です。\n" +
+                         "祈祷时也会检查已加入神明的奖励。非当前神明需要启用 Allow Joining Multiple Religions 并已有保存的加入状态。"
         );
 
         RepeatApostleRewards = config.Bind(
@@ -200,9 +200,9 @@ internal static class OmegasGodTweaksConfig
             section: Section,
             key: "Apply Joined God Bonuses",
             defaultValue: false,
-            description: "Adds faith bonus elements from joined gods.\n" +
-                         "加入済みの神の信仰ボーナスも追加します。\n" +
-                         "添加已加入神明的信仰加成。"
+            description: "Adds faith bonus elements from joined gods. Non-current gods count as joined only when Allow Joining Multiple Religions is enabled and the god has saved joined state.\n" +
+                         "加入済みの神の信仰ボーナスも追加します。現在信仰ではない神は、Allow Joining Multiple Religions が有効で、その神の加入状態が保存されている場合だけ加入済みとして扱われます。\n" +
+                         "添加已加入神明的信仰加成。非当前信仰的神明只有在启用 Allow Joining Multiple Religions 且已保存加入状态时，才会被视为已加入。"
         );
 
         RemoveFaithResistanceBonusCap = config.Bind(
@@ -218,9 +218,9 @@ internal static class OmegasGodTweaksConfig
             section: Section,
             key: "Unlock God Artifact Faction Effects",
             defaultValue: false,
-            description: "Allows joined god artifact faction effects to work even when that god is not the current faith.\n" +
-                         "加入済みの神の神アーティファクト陣営効果を、現在信仰中でなくても有効にします。\n" +
-                         "允许已加入神明的神器阵营效果在非当前信仰时生效。"
+            description: "Allows joined god artifact faction effects to work even when that god is not the current faith. For non-current gods, this requires Allow Joining Multiple Religions and saved joined state for that god.\n" +
+                         "加入済みの神の神アーティファクト陣営効果を、現在信仰中でなくても有効にします。現在信仰ではない神で有効にするには、Allow Joining Multiple Religions と、その神の保存済み加入状態が必要です。\n" +
+                         "允许已加入神明的神器阵营效果在非当前信仰时生效。对非当前信仰的神明，需要启用 Allow Joining Multiple Religions，并且该神明已有保存的加入状态。"
         );
 
         AllowDuplicateGodArtifacts = config.Bind(
@@ -254,9 +254,9 @@ internal static class OmegasGodTweaksConfig
             section: Section,
             key: "Enable Joined God Revelation Routing",
             defaultValue: false,
-            description: "Lets joined gods occasionally answer prayer revelations when Revelation Mode allows it.\n" +
-                         "Revelation Mode が許可する場合、加入済みの神も祈りの啓示に応じることがあります。\n" +
-                         "Revelation Mode 允许时，已加入神明也可能回应祈祷启示。"
+            description: "Lets joined gods occasionally answer prayer revelations when Revelation Mode allows it. Non-current gods require Allow Joining Multiple Religions and saved joined state.\n" +
+                         "Revelation Mode が許可する場合、加入済みの神も祈りの啓示に応じることがあります。現在信仰ではない神には Allow Joining Multiple Religions と保存済み加入状態が必要です。\n" +
+                         "Revelation Mode 允许时，已加入神明也可能回应祈祷启示。非当前神明需要启用 Allow Joining Multiple Religions 并已有保存的加入状态。"
         );
 
         JoinedGodRevelationChance = config.Bind(
@@ -299,9 +299,9 @@ internal static class OmegasGodTweaksConfig
             section: Section,
             key: "Revelation Mode",
             defaultValue: global::OmegasGodTweaks.RevelationMode.SelectedJoinedGod,
-            description: "Controls extra joined-god prayer revelations. Vanilla keeps only the current faith. SelectedJoinedGod checks the selected joined god. AllJoinedGods checks every joined non-current god.\n" +
-                         "加入済みの神による追加の祈りの啓示を設定します。Vanilla は現在信仰のみです。SelectedJoinedGod は選択した加入済みの神を確認します。AllJoinedGods は加入済みで現在信仰していない全ての神を確認します。\n" +
-                         "控制已加入神明的额外祈祷启示。Vanilla 仅保留当前信仰。SelectedJoinedGod 检查选定的已加入神明。AllJoinedGods 检查所有已加入但非当前信仰的神明。"
+            description: "Controls extra joined-god prayer revelations. Vanilla keeps only the current faith. SelectedJoinedGod checks the selected joined god. AllJoinedGods checks every joined non-current god. Non-current gods require Allow Joining Multiple Religions and saved joined state.\n" +
+                         "加入済みの神による追加の祈りの啓示を設定します。Vanilla は現在信仰のみです。SelectedJoinedGod は選択した加入済みの神を確認します。AllJoinedGods は加入済みで現在信仰していない全ての神を確認します。現在信仰ではない神には Allow Joining Multiple Religions と保存済み加入状態が必要です。\n" +
+                         "控制已加入神明的额外祈祷启示。Vanilla 仅保留当前信仰。SelectedJoinedGod 检查选定的已加入神明。AllJoinedGods 检查所有已加入但非当前信仰的神明。非当前神明需要启用 Allow Joining Multiple Religions 并已有保存的加入状态。"
         );
 
         SelectedRevelationGod = config.Bind(
@@ -313,7 +313,9 @@ internal static class OmegasGodTweaksConfig
                          "Revelation Mode = SelectedJoinedGod 使用的宗教ID。"
         );
 
-        AllowJoiningMultipleReligions.SettingChanged += (_, _) => ElementContainerPatch.RefreshAppliedArtifactEffects();
+        AllowJoiningMultipleReligions.SettingChanged += (_, _) => RefreshJoinedRuntimeState();
+        ApplyJoinedGodBonuses.SettingChanged += (_, _) => RefreshPlayerFaithElements();
+        RemoveFaithResistanceBonusCap.SettingChanged += (_, _) => RefreshPlayerFaithElements();
         UnlockGodArtifactFactionEffects.SettingChanged += (_, _) => ElementContainerPatch.RefreshAppliedArtifactEffects();
     }
 
@@ -349,6 +351,23 @@ internal static class OmegasGodTweaksConfig
         {
             TranslationXlsxPath = string.Empty;
         }
+    }
+
+    private static void RefreshJoinedRuntimeState()
+    {
+        RefreshPlayerFaithElements();
+        ElementContainerPatch.RefreshAppliedArtifactEffects();
+    }
+
+    private static void RefreshPlayerFaithElements()
+    {
+        Chara? player = EClass.pc;
+        if (player == null)
+        {
+            return;
+        }
+
+        player.RefreshFaithElement();
     }
 }
 

@@ -10,12 +10,12 @@
 
     [h1] Features [/h1]
     [list]
-    [*] Lets players stay joined to multiple gods, with per-god piety, worship days, joined state, reward rank, and reward history saved in the current save.
+    [*] Lets players stay joined to multiple gods, with per-god piety, worship days, joined state, reward rank, and reward history saved in the current save. This preserves progress going forward after the mod has seen that god in the save. If this setting is off, saved non-current god progress is ignored for gameplay but kept in the save without being erased or reduced; vanilla cannot recover piety for gods left before installing the mod.
     [*] Can remove wrath punishment from faith changes and failed altar takeovers.
     [*] Offering tweaks can support joined non-current gods, any normal item category, piety cap removal, overflow preservation, weight and level bonus cap removal, harvest quest karma protection, and piety/Faith skill display.
     [*] Prayer tweaks can add piety, allow repeated manual prayers, include passive prayer, apply piety to joined gods, check joined-god rewards, route revelations, and show piety/Faith skill.
     [*] Repeat rewards can grant extra apostles at piety 15, 45, 75, and so on, and extra god artifacts at piety 30, 60, 90, and so on.
-    [*] Faith bonus and artifact tweaks can add joined-god bonuses, remove the faith resistance bonus cap, unlock joined-god artifact faction effects, allow duplicate god artifacts, and disable Eyth's single-artifact cleanup.
+    [*] Faith bonus and artifact tweaks can add joined-god bonuses, remove the faith resistance bonus cap, unlock joined-god artifact faction effects, allow duplicate god artifacts, and disable Eyth's single-artifact cleanup. Non-current god bonuses and artifact effects require Allow Joining Multiple Religions and saved joined state for that god.
     [*] Can disable apostle infighting in the player party.
     [*] Can route prayer revelations to vanilla current faith, one selected joined god, or all joined gods, with configurable extra revelation chance.
     [*] Can show saved per-god state from installed god altars.
@@ -24,7 +24,10 @@
 
     [h1] Compatibility [/h1]
     God progress is stored in the current save.
+    Turning Allow Joining Multiple Religions off makes previous gods stop counting as joined, but it does not erase or reduce saved mod progress.
+    Non-current joined-god features require Allow Joining Multiple Religions and saved joined state for that god.
     Saved god progress includes each god's piety, days with god, joined state, reward rank, and repeat reward history.
+    The mod cannot import old piety for gods you already left before installing it because vanilla does not store per-god piety after you leave a god.
     When enabled, this mod can remove offering piety caps and preserve overflow, but it does not add multiple piety level-ups from one offering by itself. If NoGainExpLimit is installed, that mod can handle multiple piety level-ups from very large offerings.
 
     [h1] Uninstall Note [/h1]
@@ -36,16 +39,16 @@
     [h1] Configuration File Location [/h1]
     [code] Steam\steamapps\common\Elin\BepInEx\config\omegaplatinum.elin.omegasgodtweaks.cfg [/code]
 
-    [img] https://img.shields.io/badge/Supports%20Game%20Version-EA%2023.295%20Stable-green [/img]
+    [img] https://img.shields.io/badge/Supports%20Game%20Version-EA%2023.307%20Stable-green [/img]
 
     [h1] 特徴 [/h1]
     [list]
-    [*]複数の神に加入したまま、神ごとの信仰心、信仰日数、加入状態、報酬ランク、報酬履歴を現在のセーブに保持できます。
+    [*]複数の神に加入したまま、神ごとの信仰心、信仰日数、加入状態、報酬ランク、報酬履歴を現在のセーブに保持できます。このMODがそのセーブ内で確認した後の進行を保持します。この設定がオフの間、現在信仰ではない神の保存済み進行はゲームプレイでは無視されますが、削除・減少されずにセーブへ保持されます。導入前に離れた神の信仰心は、バニラ側に復元できる形では残りません。
     [*]改宗時と祭壇乗っ取り失敗時の神罰を無効にできます。
     [*]捧げ物設定では、非現在の加入済み神、任意カテゴリ、信仰心上限解除、余り保持、重量とレベルボーナス上限解除、収穫依頼品のカルマ保護、信仰心/信仰スキル表示を扱えます。
     [*]祈り設定では、信仰心追加、手動祈りの繰り返し、受動祈り、加入済み神への信仰心適用、加入済み神の報酬確認、啓示振り分け、信仰心/信仰スキル表示を扱えます。
     [*]同じ神から、信仰心15、45、75…で使徒報酬を、30、60、90…で神アーティファクト報酬を再入手できます。
-    [*]信仰ボーナスと神アーティファクト設定では、加入済み神の恩恵、信仰耐性上限解除、別信仰での神アーティファクト効果、重複許可、エイスの単一アーティファクト整理無効化を扱えます。
+    [*]信仰ボーナスと神アーティファクト設定では、加入済み神の恩恵、信仰耐性上限解除、別信仰での神アーティファクト効果、重複許可、エイスの単一アーティファクト整理無効化を扱えます。現在信仰ではない神の恩恵と神アーティファクト効果には、Allow Joining Multiple Religions と、その神の保存済み加入状態が必要です。
     [*]プレイヤーパーティ内の使徒同士の争いを無効にできます。
     [*]祈りの啓示を、バニラの現在信仰、選択した加入済みの神、または加入済みの全ての神へ振り分けられ、追加啓示の確率も設定できます。
     [*]設置された神の祭壇から、神ごとの保存済み状態を確認できます。
@@ -54,7 +57,10 @@
 
     [h1] 互換性 [/h1]
     神ごとの進行は現在のセーブに保存されます。
+    Allow Joining Multiple Religions をオフにすると、以前の神は加入済みとして扱われなくなりますが、保存済みのMOD進行は削除されたり減らされたりしません。
+    現在信仰ではない神の加入済み機能には、Allow Joining Multiple Religions と、その神の保存済み加入状態が必要です。
     保存される神ごとの進行には、信仰心、信仰日数、加入状態、報酬ランク、再入手報酬履歴が含まれます。
+    導入前にすでに離れた神の信仰心は取り込めません。バニラでは、神から離れた後に神ごとの信仰心が残らないためです。
     有効にすると、このMODは捧げ物による信仰心上限を解除し、あふれた分を保持できますが、1回の捧げ物で複数レベル上がる処理自体は追加しません。NoGainExpLimit が導入されている場合、非常に大きな捧げ物による複数レベル上昇はそちらが処理できます。
 
     [h1] アンインストール時の注意 [/h1]
@@ -66,9 +72,9 @@
     [h1] 設定ファイルの場所 [/h1]
     [code] Steam\steamapps\common\Elin\BepInEx\config\omegaplatinum.elin.omegasgodtweaks.cfg [/code]
 
-    [img] https://img.shields.io/badge/対応ゲームバージョン-EA%2023.295%20Stable-green [/img]
+    [img] https://img.shields.io/badge/対応ゲームバージョン-EA%2023.307%20Stable-green [/img]
   </description>
   <tags>Balance, QoL, Cheat</tags>
   <visibility>Public</visibility>
-  <version>0.23.295</version>
+  <version>0.23.307</version>
 </Meta>

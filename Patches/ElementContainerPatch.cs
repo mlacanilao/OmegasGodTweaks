@@ -118,6 +118,26 @@ internal static class ElementContainerPatch
             {
                 bool isApplied = IsAppliedJoinedArtifact(t: artifact);
                 bool shouldApply = ShouldApplyJoinedArtifact(t: artifact);
+                FeatureTestLog.Log(
+                    feature: "Unlock God Artifact Faction Effects",
+                    detail: "refresh considered equipped god artifact; artifact=" +
+                            FeatureTestLog.GetThingId(thing: artifact) +
+                            ", uid=" +
+                            artifact.uid.ToString() +
+                            ", deityId=" +
+                            (artifact.c_idDeity ?? string.Empty) +
+                            ", currentFaithId=" +
+                            (GetCurrentFaithId() ?? string.Empty) +
+                            ", unlockToggle=" +
+                            OmegasGodTweaksConfig.UnlockGodArtifactFactionEffects.Value.ToString() +
+                            ", allowMulti=" +
+                            OmegasGodTweaksConfig.AllowJoiningMultipleReligions.Value.ToString() +
+                            ", deityJoined=" +
+                            GodFaithStateService.IsJoinedGodId(godId: artifact.c_idDeity).ToString() +
+                            ", alreadyApplied=" +
+                            isApplied.ToString() +
+                            ", shouldApplyJoinedEffect=" +
+                            shouldApply.ToString());
 
                 if (isApplied == true)
                 {
