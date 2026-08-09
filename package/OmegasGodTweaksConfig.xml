@@ -3,7 +3,9 @@
     <hlayout id="JoiningLayout">
         <vlayout id="JoiningGroup" border="true">
             <title>config.joining.title</title>
-            <text id="config.joining.description">config.joining.description</text>
+            <hlayout>
+                <text id="config.joining.description" width="1.0">config.joining.description</text>
+            </hlayout>
 
             <toggle id="AllowJoiningMultipleReligionsToggle">
                 <contentId>config.allow_joining_multiple_religions.name</contentId>
@@ -23,7 +25,9 @@
     <hlayout id="OfferingsLayout">
         <vlayout id="OfferingsGroup" border="true">
             <title>config.offerings.title</title>
-            <text id="config.offerings.description">config.offerings.description</text>
+            <hlayout>
+                <text id="config.offerings.description" width="1.0">config.offerings.description</text>
+            </hlayout>
 
             <toggle id="AllowOfferingsForJoinedNonCurrentGodsToggle">
                 <contentId>config.allow_offerings_for_joined_non_current_gods.name</contentId>
@@ -63,7 +67,9 @@
     <hlayout id="PrayerLayout">
         <vlayout id="PrayerGroup" border="true">
             <title>config.prayer.title</title>
-            <text id="config.prayer.description">config.prayer.description</text>
+            <hlayout>
+                <text id="config.prayer.description" width="1.0">config.prayer.description</text>
+            </hlayout>
 
             <toggle id="AddPietyGainFromPrayerToggle">
                 <contentId>config.add_piety_gain_from_prayer.name</contentId>
@@ -99,7 +105,9 @@
     <hlayout id="RewardsLayout">
         <vlayout id="RewardsGroup" border="true">
             <title>config.rewards.title</title>
-            <text id="config.rewards.description">config.rewards.description</text>
+            <hlayout>
+                <text id="config.rewards.description" width="1.0">config.rewards.description</text>
+            </hlayout>
 
             <toggle id="RepeatApostleRewardsToggle">
                 <contentId>config.repeat_apostle_rewards.name</contentId>
@@ -115,7 +123,9 @@
     <hlayout id="ArtifactsLayout">
         <vlayout id="ArtifactsGroup" border="true">
             <title>config.artifacts.title</title>
-            <text id="config.artifacts.description">config.artifacts.description</text>
+            <hlayout>
+                <text id="config.artifacts.description" width="1.0">config.artifacts.description</text>
+            </hlayout>
 
             <toggle id="ApplyJoinedGodBonusesToggle">
                 <contentId>config.apply_joined_god_bonuses.name</contentId>
@@ -147,7 +157,9 @@
     <hlayout id="RevelationLayout">
         <vlayout id="RevelationGroup" border="true">
             <title>config.revelation.title</title>
-            <text id="config.revelation.description">config.revelation.description</text>
+            <hlayout>
+                <text id="config.revelation.description" width="1.0">config.revelation.description</text>
+            </hlayout>
 
             <toggle id="EnableJoinedGodRevelationRoutingToggle">
                 <contentId>config.enable_joined_god_revelation_routing.name</contentId>
@@ -181,7 +193,9 @@
     <hlayout id="GodStatsLayout">
         <vlayout id="GodStatsGroup" border="true">
             <title>config.god_stats.title</title>
-            <text id="config.god_stats.description">config.god_stats.description</text>
+            <hlayout>
+                <text id="config.god_stats.description" width="1.0">config.god_stats.description</text>
+            </hlayout>
 
             <topic>config.god_stats.dropdown.title</topic>
             <one_choice id="GodStatsDropdown" type="dropdown" value="0">

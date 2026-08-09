@@ -14,6 +14,8 @@ namespace OmegasGodTweaks.UI;
 
 internal static class UIController
 {
+    private const float MinimumDescriptionLabelWidth = 540f;
+    private const float DescriptionLabelHorizontalPadding = 40f;
     private const string AllowJoiningMultipleReligionsToggleId = "AllowJoiningMultipleReligionsToggle";
     private const string RemoveConversionPunishmentToggleId = "RemoveConversionPunishmentToggle";
     private const string RemoveAltarTakeoverPunishmentToggleId = "RemoveAltarTakeoverPunishmentToggle";
@@ -95,7 +97,16 @@ internal static class UIController
     {
         controller.OnBuildUI += builder =>
         {
-            AlignDescriptionLabels(builder: builder);
+            foreach (string textId in DescriptionLabelIds)
+            {
+                OptLabel? label = GetRequiredPreBuild<OptLabel>(builder: builder, id: textId);
+                if (label == null)
+                {
+                    continue;
+                }
+
+                ApplyDescriptionLabelLayout(label: label);
+            }
 
             BindToggle(builder: builder, id: AllowJoiningMultipleReligionsToggleId, entry: OmegasGodTweaksConfig.AllowJoiningMultipleReligions);
             BindToggle(builder: builder, id: RemoveConversionPunishmentToggleId, entry: OmegasGodTweaksConfig.RemoveConversionPunishment);
@@ -138,18 +149,59 @@ internal static class UIController
         };
     }
 
-    private static void AlignDescriptionLabels(OptionUIBuilder builder)
+    private static void ApplyDescriptionLabelLayout(OptLabel label)
     {
-        foreach (string textId in DescriptionLabelIds)
+        label.Align = TextAnchor.UpperLeft;
+        if (label.Base == null ||
+            label.Base.text1 == null)
         {
-            OptLabel? text = GetRequiredPreBuild<OptLabel>(builder: builder, id: textId);
-            if (text == null)
+            return;
+        }
+
+        float width = GetAvailableDescriptionLabelWidth(transform: label.Base.text1.transform);
+        ApplyLayoutWidth(rectTransform: label.Base.GetComponent<RectTransform>(), width: width);
+        ApplyLayoutWidth(rectTransform: label.Base.text1.rectTransform, width: width);
+    }
+
+    private static float GetAvailableDescriptionLabelWidth(Transform transform)
+    {
+        Transform? current = transform;
+        for (int i = 0; i < 8 && current != null; i++)
+        {
+            if (current.name == "Content" ||
+                current.name == "Viewport")
             {
-                continue;
+                RectTransform? rectTransform = current as RectTransform;
+                if (rectTransform != null &&
+                    rectTransform.rect.width > MinimumDescriptionLabelWidth)
+                {
+                    return rectTransform.rect.width - DescriptionLabelHorizontalPadding;
+                }
             }
 
-            text.Align = TextAnchor.UpperLeft;
+            current = current.parent;
         }
+
+        return MinimumDescriptionLabelWidth;
+    }
+
+    private static void ApplyLayoutWidth(RectTransform? rectTransform, float width)
+    {
+        if (rectTransform == null)
+        {
+            return;
+        }
+
+        LayoutElement? layoutElement = rectTransform.GetComponent<LayoutElement>();
+        if (layoutElement == null)
+        {
+            layoutElement = rectTransform.gameObject.AddComponent<LayoutElement>();
+        }
+
+        layoutElement.minWidth = width;
+        layoutElement.preferredWidth = width;
+        layoutElement.flexibleWidth = 0f;
+        rectTransform.SetSizeWithCurrentAnchors(axis: RectTransform.Axis.Horizontal, size: width);
     }
 
     private static void BindToggle(OptionUIBuilder builder, string id, ConfigEntry<bool> entry)

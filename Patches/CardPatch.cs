@@ -58,7 +58,7 @@ internal static class CardPatch
 
             foreach (Thing otherArtifact in artifacts)
             {
-                Religion artifactDeity = Religion.GetArtifactDeity(id: otherArtifact.id);
+                Religion artifactDeity = EClass.game.religions.GetArtifactDeity(id: otherArtifact.id);
                 if (otherArtifact.isEquipped == true)
                 {
                     chara.body.Unequip(thing: otherArtifact, refresh: true);

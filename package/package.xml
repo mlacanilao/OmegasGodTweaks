@@ -39,7 +39,7 @@
     [h1] Configuration File Location [/h1]
     [code] Steam\steamapps\common\Elin\BepInEx\config\omegaplatinum.elin.omegasgodtweaks.cfg [/code]
 
-    [img] https://img.shields.io/badge/Supports%20Game%20Version-EA%2023.307%20Stable-green [/img]
+    [img] https://img.shields.io/badge/Supports%20Game%20Version-EA%2023.325%20Patch%202%20Stable-green [/img]
 
     [h1] 特徴 [/h1]
     [list]
@@ -72,9 +72,9 @@
     [h1] 設定ファイルの場所 [/h1]
     [code] Steam\steamapps\common\Elin\BepInEx\config\omegaplatinum.elin.omegasgodtweaks.cfg [/code]
 
-    [img] https://img.shields.io/badge/対応ゲームバージョン-EA%2023.307%20Stable-green [/img]
+    [img] https://img.shields.io/badge/対応ゲームバージョン-EA%2023.325%20Patch%202%20Stable-green [/img]
   </description>
   <tags>Balance, QoL, Cheat</tags>
   <visibility>Public</visibility>
-  <version>0.23.307</version>
+  <version>0.23.325</version>
 </Meta>

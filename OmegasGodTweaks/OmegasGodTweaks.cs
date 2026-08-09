@@ -10,7 +10,7 @@ internal static class ModInfo
 {
     internal const string Guid = "omegaplatinum.elin.omegasgodtweaks";
     internal const string Name = "Omegas God Tweaks";
-    internal const string Version = "1.1.0";
+    internal const string Version = "1.1.1";
     internal const string ModOptionsGuid = "evilmask.elinplugins.modoptions";
 }
 
