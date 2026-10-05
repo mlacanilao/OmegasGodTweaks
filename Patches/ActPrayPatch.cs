@@ -14,7 +14,7 @@ internal static class ActPrayPatch
     internal static IEnumerable<CodeInstruction> TryPrayTranspiler(IEnumerable<CodeInstruction> instructions)
     {
         CodeMatcher codeMatcher = new CodeMatcher(instructions: instructions);
-        MethodInfo? vanillaTryGetGift = AccessTools.Method(type: typeof(Religion), name: nameof(Religion.TryGetGift));
+        MethodInfo? vanillaTryGetGift = AccessTools.Method(type: typeof(Religion), name: nameof(Religion.TryGetGift), parameters: new[] { typeof(Chara) });
         MethodInfo? tryGetGiftIncludingJoinedGods = AccessTools.Method(
             type: typeof(ActPrayPatch),
             name: nameof(TryGetGiftIncludingJoinedGods),
@@ -40,7 +40,6 @@ internal static class ActPrayPatch
         CodeInstruction instruction = codeMatcher.Instruction;
         instruction.opcode = OpCodes.Call;
         instruction.operand = tryGetGiftIncludingJoinedGods;
-        codeMatcher.Insert(new CodeInstruction(opcode: OpCodes.Ldarg_0));
         return codeMatcher.Instructions();
     }
 
@@ -340,7 +339,7 @@ internal static class ActPrayPatch
         bool currentGodGotGift = false;
         if (currentReligion != null)
         {
-            currentGodGotGift = currentReligion.TryGetGift();
+            currentGodGotGift = currentReligion.TryGetGift(chara: c);
         }
 
         if (ShouldCheckJoinedPrayerRewards(c: c) == false)
@@ -362,7 +361,7 @@ internal static class ActPrayPatch
                 religion: religion,
                 action: () =>
                 {
-                    joinedGotGift = religion.TryGetGift();
+                    joinedGotGift = religion.TryGetGift(chara: c);
                     FeatureTestLog.Log(
                         feature: "Joined Prayer Rewards",
                         detail: "joined god TryGetGift returned; joinedFaith=" +
@@ -460,7 +459,7 @@ internal static class ActPrayPatch
                         feature: "Revelation Mode",
                         detail: "SelectedJoinedGod; routing joined revelation to god=" +
                                 FeatureTestLog.GetReligionId(religion: religion));
-                    Reveal(religion: religion);
+                    Reveal(religion: religion, c: c);
                 }
 
                 return;
@@ -471,7 +470,7 @@ internal static class ActPrayPatch
                         feature: "Revelation Mode",
                         detail: "AllJoinedGods; routing joined revelation to god=" +
                                 FeatureTestLog.GetReligionId(religion: joinedReligion));
-                    Reveal(religion: joinedReligion);
+                    Reveal(religion: joinedReligion, c: c);
                 }
 
                 return;
@@ -518,7 +517,7 @@ internal static class ActPrayPatch
         return religion;
     }
 
-    private static void Reveal(Religion religion)
+    private static void Reveal(Religion religion, Chara c)
     {
         int chance = OmegasGodTweaksConfig.ClampPercent(value: OmegasGodTweaksConfig.JoinedGodRevelationChance.Value);
         if (chance <= 0)
@@ -546,6 +545,7 @@ internal static class ActPrayPatch
 
         religion.Revelation(
             idTalk: idTalk,
+            c: c,
             chance: vanillaChance);
     }
 
